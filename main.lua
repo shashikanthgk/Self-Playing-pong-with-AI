@@ -1,42 +1,11 @@
---[[
-    GD50 2018
-    Pong Remake
 
-    -- Main Program --
-
-    Author: Colton Ogden
-    cogden@cs50.harvard.edu
-
-    Originally programmed by Atari in 1972. Features two
-    paddles, controlled by players, with the goal of getting
-    the ball past your opponent's edge. First to 10 points wins.
-
-    This version is built to more closely resemble the NES than
-    the original Pong machines or the Atari 2600 in terms of
-    resolution, though in widescreen (16:9) so it looks nicer on 
-    modern systems.
-]]
-
--- push is a library that will allow us to draw our game at a virtual
--- resolution, instead of however large our window is; used to provide
--- a more retro aesthetic
---
--- https://github.com/Ulydev/push
 push = require 'push'
 math = require 'math'
--- the "Class" library we're using will allow us to represent anything in
--- our game as code, rather than keeping track of many disparate variables and
--- methods
---
--- https://github.com/vrld/hump/blob/master/class.lua
+
 Class = require 'class'
 
--- our Paddle class, which stores position and dimensions for each Paddle
--- and the logic for rendering them
 require 'Paddle'
 
--- our Ball class, which isn't much different than a Paddle structure-wise
--- but which will mechanically function very differently
 require 'Ball'
 
 -- size of our actual window
@@ -50,19 +19,11 @@ VIRTUAL_HEIGHT = 243
 -- paddle movement speed
 PADDLE_SPEED = 200
 
---[[
-    Called just once at the beginning of the game; used to set up
-    game objects, variables, etc. and prepare the game world.
-]]
-function love.conf(t)
-	t.console = true
-end
+
 
 
 function love.load()
-    -- set love's default filter to "nearest-neighbor", which essentially
-    -- means there will be no filtering of pixels (blurriness), which is
-    -- important for a nice crisp, 2D look
+
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
     -- set the title of our application window
@@ -114,32 +75,15 @@ function love.load()
     -- that state in the game
     winningPlayer = 0
 
-    -- the state of our game; can be any of the following:
-    -- 1. 'start' (the beginning of the game, before first serve)
-    -- 2. 'serve' (waiting on a key press to serve the ball)
-    -- 3. 'play' (the ball is in play, bouncing between paddles)
-    -- 4. 'done' (the game is over, with a victor, ready for restart)
+ 
     gameState = 'start'
 end
 
---[[
-    Called whenever we change the dimensions of our window, as by dragging
-    out its bottom corner, for example. In this case, we only need to worry
-    about calling out to `push` to handle the resizing. Takes in a `w` and
-    `h` variable representing width and height, respectively.
-]]
+
 function love.resize(w, h)
     push:resize(w, h)
 end
 
---[[
-    Called every frame, passing in `dt` since the last frame. `dt`
-    is short for `deltaTime` and is measured in seconds. Multiplying
-    this by any changes we wish to make in our game will allow our
-    game to perform consistently across all hardware; otherwise, any
-    changes we make will be applied as fast as possible and will vary
-    across system hardware.
-]]
 function love.update(dt)
     if gameState == 'serve' then
         -- before switching to play, initialize ball's velocity based
@@ -151,9 +95,7 @@ function love.update(dt)
             ball.dx = -math.random(140, 200)
         end
     elseif gameState == 'play' then
-        -- detect ball collision with paddles, reversing dx if true and
-        -- slightly increasing it, then altering the dy based on the position
-        -- at which it collided, then playing a sound effect
+      
         if ball:collides(player1) then
             ball.dx = -ball.dx * 1.03
             ball.x = player1.x + 5
@@ -258,6 +200,8 @@ function love.update(dt)
     if gameState == 'play' then
         ball:update(dt)
         width = VIRTUAL_WIDTH-5;
+
+        --Player2 AI update
         if ball.dx>0  then
             t1 = width-ball.x
             x = (ball.dy/ball.dx)*(t1)
@@ -266,6 +210,7 @@ function love.update(dt)
             else
                 player2.dy = (((ball.y+x)-(player2.y+20))*(ball.dx/t1))
             end
+        --Player1 AI update
         else
             t1 = ball.x
             x = (ball.dy/math.abs(ball.dx))*(t1)
@@ -282,12 +227,7 @@ function love.update(dt)
     player2:update(dt)
 end
 
---[[
-    A callback that processes key strokes as they happen, just the once.
-    Does not account for keys that are held down, which is handled by a
-    separate function (`love.keyboard.isDown`). Useful for when we want
-    things to happen right away, just once, like when we want to quit.
-]]
+
 function love.keypressed(key)
     -- `key` will be whatever key this callback detected as pressed
     if key == 'escape' then
@@ -321,10 +261,7 @@ function love.keypressed(key)
     end
 end
 
---[[
-    Called each frame after update; is responsible simply for
-    drawing all of our game objects and more to the screen.
-]]
+
 function love.draw()
     -- begin drawing with push, in our virtual resolution
     push:start()
@@ -369,9 +306,7 @@ function love.draw()
     push:finish()
 end
 
---[[
-    Simple function for rendering the scores.
-]]
+
 function displayScore()
     -- score display
     love.graphics.setFont(scoreFont)
@@ -381,9 +316,7 @@ function displayScore()
         VIRTUAL_HEIGHT / 3)
 end
 
---[[
-    Renders the current FPS.
-]]
+
 function displayFPS()
     -- simple FPS display across all states
     love.graphics.setFont(smallFont)
